@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ❓ Questions & Discussions
+    url: https://github.com/devDanielCespedes/ionic-to-do-list/discussions
+    about: Use GitHub Discussions for general questions.
