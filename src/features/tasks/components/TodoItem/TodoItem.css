@@ -1,0 +1,33 @@
+.todo-item {
+  margin-bottom: 0.5rem;
+}
+
+.task-done {
+  text-decoration: line-through;
+  color: var(--ion-color-medium);
+}
+
+.task-label-pointer {
+  cursor: pointer;
+}
+
+.badge-clickable {
+  cursor: pointer;
+}
+
+.badge-high {
+  --background: var(--ion-color-danger);
+}
+
+.badge-medium {
+  --background: var(--ion-color-warning);
+}
+
+.badge-low {
+  --background: var(--ion-color-primary);
+}
+
+
+.todo-item-description {
+  margin-top: 10px;
+}

@@ -1,7 +1,6 @@
 import { IonApp, IonRouterOutlet, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
-import Home from "./pages/Home";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -31,6 +30,7 @@ import "@ionic/react/css/palettes/dark.class.css";
 import "@ionic/react/css/palettes/dark.system.css";
 
 /* Theme variables */
+import { TabNavigation } from "./features/tasks/components/TabNavigation/TabNavigation";
 import "./theme/variables.css";
 
 setupIonicReact();
@@ -38,13 +38,9 @@ setupIonicReact();
 export const App = (): JSX.Element => (
   <IonApp>
     <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
+      <IonRouterOutlet id="main">
+        <Route path="/tabs" component={TabNavigation} />
+        <Route exact path="/" render={() => <Redirect to="/tabs/active" />} />
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>
