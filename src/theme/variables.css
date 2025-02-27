@@ -1,2 +1,9 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
+
+@media (min-width: 768px) {
+  .mobile-tabs {
+    display: none !important;
+  }
+}
+
