@@ -73,7 +73,7 @@ export function TodoForms() {
       <IonGrid>
         <form onSubmit={handleSubmit(onSubmit)}>
           <IonRow>
-            <IonCol size="12" sizeLg="3" sizeXl="2">
+            <IonCol size="12" sizeLg="3">
               <IonItem>
                 <IonLabel position="stacked">Priority</IonLabel>
                 <IonSelect {...register("priority")}>
@@ -86,7 +86,7 @@ export function TodoForms() {
               </IonItem>
               {errors.priority && <IonNote color="danger">{errors.priority.message}</IonNote>}
             </IonCol>
-            <IonCol size="12" sizeLg="8">
+            <IonCol size="12" sizeLg="9">
               <IonItem>
                 <IonLabel position="stacked">
                   Title ({watchedTitle?.length ?? 0}/{TITLE_MAX_LENGTH})

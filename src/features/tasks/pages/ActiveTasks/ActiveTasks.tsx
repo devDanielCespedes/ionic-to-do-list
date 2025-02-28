@@ -23,7 +23,6 @@ import { LoadingOverlay } from "../../components/LoadingOverlay/LoadingOverlay";
 import "./ActiveTasks.css";
 
 export function ActiveTasks() {
-  // const { tasks } = useTaskStore();
   const isMobile = useIsMobile();
   const [showFilterModal, setShowFilterModal] = useState(false);
 
