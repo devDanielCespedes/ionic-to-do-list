@@ -32,12 +32,16 @@ import "@ionic/react/css/palettes/dark.system.css";
 /* Theme variables */
 import { TabNavigation } from "./features/tasks/components/TabNavigation/TabNavigation";
 import { TestGraphQL } from "./features/tasks/pages/TestGraphQL";
+import { Snackbar } from "./shared/components/Snackbar/Snackbar";
+
 import "./theme/variables.css";
 
 setupIonicReact();
 
 export const App = (): JSX.Element => (
   <IonApp>
+    <Snackbar />
+
     <IonReactRouter>
       <IonRouterOutlet id="main">
         <Route path="/tabs" component={TabNavigation} />
