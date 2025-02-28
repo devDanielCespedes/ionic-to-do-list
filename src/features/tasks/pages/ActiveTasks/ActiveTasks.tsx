@@ -93,7 +93,7 @@ export function ActiveTasks() {
       const matchesPriority =
         task.priority !== undefined && selectedPriorities.includes(task.priority);
 
-      return matchesStatus && matchesPriority;
+      return !!matchesStatus && !!matchesPriority;
     });
   }, [tasks, selectedStatuses, selectedPriorities]);
 
