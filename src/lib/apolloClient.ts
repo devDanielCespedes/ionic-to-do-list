@@ -8,8 +8,11 @@ if (import.meta.env.NODE_ENV !== "production") {
 }
 
 const httpLink = new HttpLink({
-  uri: "http://localhost:4000/graphql",
-  credentials: "include",
+  uri: import.meta.env.VITE_API_BASE_URL || "http://localhost:4000/graphql",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 export const apolloClient = new ApolloClient({
