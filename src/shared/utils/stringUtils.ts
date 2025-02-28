@@ -12,6 +12,7 @@ export function capitalizeWords<T extends string>(string: T): CapitalizeWords<T>
   // A implementação no runtime não consegue inferir o resultado de forma automática,
   // por isso é necessário usar "as" para alinhar com o tipo.
   return string
+    .toLowerCase()
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ") as CapitalizeWords<T>;
