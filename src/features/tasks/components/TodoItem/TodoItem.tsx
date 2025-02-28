@@ -1,5 +1,6 @@
 import {
   IonActionSheet,
+  IonAlert,
   IonBadge,
   IonButton,
   IonCheckbox,
@@ -23,31 +24,45 @@ import {
 } from "ionicons/icons";
 import { useCallback, useMemo, useState } from "react";
 
+import {
+  useDeleteTaskMutation,
+  useToggleTaskArchivedMutation,
+  useToggleTaskDoneMutation,
+} from "../../../../graphql/generated";
+import { GET_TASKS } from "../../../../graphql/queries";
 import { useIsMobile } from "../../../../shared/hooks/useIsMobile";
-import { Task } from "../../shared/schemas";
+import { useSnackbar } from "../../../../shared/hooks/useSnackbar";
+import { PrioritySchema, Task } from "../../shared/schemas";
+import { LoadingOverlay } from "../LoadingOverlay/LoadingOverlay";
 import "./TodoItem.css";
 
 interface TodoItemProps {
   task: Task;
-  onToggleDone?: (id: string) => void;
-  onArchive?: (id: string) => void;
-  onRestore?: (id: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (task: Task) => void;
+  onEdit: (taskId: Task["id"]) => void;
   isArchived?: boolean;
 }
 
-export function TodoItem({
-  task,
-  onToggleDone,
-  onArchive,
-  onRestore,
-  onDelete,
-  onEdit,
-  isArchived,
-}: TodoItemProps) {
+export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showActionSheet, setShowActionSheet] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+
+  const [deleteTask, { loading: deleteTaskLoading }] = useDeleteTaskMutation({
+    refetchQueries: [{ query: GET_TASKS }],
+  });
+
+  const [toggleTaskDone, { loading: toggleTaskDoneLoading }] = useToggleTaskDoneMutation({
+    refetchQueries: [{ query: GET_TASKS }],
+  });
+
+  const [toggleTaskArchived, { loading: toggleTaskArchivedLoading }] =
+    useToggleTaskArchivedMutation({
+      refetchQueries: [{ query: GET_TASKS }],
+    });
+
+  const isLoading = deleteTaskLoading || toggleTaskDoneLoading || toggleTaskArchivedLoading;
+
+  const { showError, clearMessage, setMessage } = useSnackbar();
 
   const isMobile = useIsMobile();
 
@@ -55,23 +70,84 @@ export function TodoItem({
     if (done) return { text: "DONE", color: "success" };
     return {
       text: priority.toUpperCase(),
-      color: priority === "high" ? "danger" : priority === "medium" ? "warning" : "primary",
+      color:
+        priority === PrioritySchema.enum.High
+          ? "danger"
+          : priority === PrioritySchema.enum.Medium
+            ? "warning"
+            : "primary",
     };
   };
 
-  const { text, color } = getBadgeData(task.done, task.priority);
+  const { text, color } = getBadgeData(task?.done ?? false, task.priority);
 
   const priorityClass =
-    task.priority === "high"
+    task.priority === PrioritySchema.enum.High
       ? "badge-high"
-      : task.priority === "medium"
+      : task.priority === PrioritySchema.enum.Medium
         ? "badge-medium"
         : "badge-low";
 
-  const handleOnDelete = useCallback(() => onDelete(task.id), [onDelete, task.id]);
-  const handleArchive = useCallback(() => onArchive && onArchive(task.id), [onArchive, task.id]);
-  const handleRestore = useCallback(() => onRestore && onRestore(task.id), [onRestore, task.id]);
-  const handleEdit = useCallback(() => onEdit(task), [onEdit, task]);
+  const handleOnDelete = useCallback(async () => {
+    clearMessage();
+
+    try {
+      const { errors } = await deleteTask({ variables: { id: task.id } });
+
+      if (errors && errors.length > 0) {
+        throw new Error(errors.map((err) => err.message).join(", "));
+      }
+
+      setMessage("Task deleted successfully", "success");
+    } catch (error) {
+      console.error("Captured error in TodoForms:", error);
+      showError(error);
+    }
+  }, [deleteTask, task.id]);
+
+  const handleToggleDone = useCallback(async () => {
+    clearMessage();
+
+    try {
+      const { errors } = await toggleTaskDone({
+        variables: { id: task.id },
+      });
+
+      if (errors && errors.length > 0) {
+        throw new Error(errors.map((err) => err.message).join(", "));
+      }
+
+      setMessage(`Task ${task.done ? "undone" : "done"} successfully`, "success");
+    } catch (error) {
+      console.error("Captured error in TodoForms:", error);
+      showError(error);
+    }
+  }, [toggleTaskDone, task.id, task.done]);
+
+  const handleArchive = useCallback(async () => {
+    clearMessage();
+
+    try {
+      const { errors } = await toggleTaskArchived({
+        variables: { id: task.id },
+      });
+
+      if (errors && errors.length > 0) {
+        throw new Error(errors.map((err) => err.message).join(", "));
+      }
+
+      setMessage(`Task ${isArchived ? "restored" : "archived"} successfully`, "success");
+    } catch (error) {
+      console.error("Captured error in TodoForms:", error);
+      showError(error);
+    }
+  }, [toggleTaskArchived, task.id]);
+
+  const handleDeleteConfirm = () => {
+    setShowDeleteAlert(true);
+  };
+
+  const handleEdit = useCallback(() => onEdit(task.id), [onEdit, task.id]);
 
   const actionSheetButtons = useMemo(
     () => [
@@ -85,13 +161,13 @@ export function TodoItem({
             {
               text: "Restore",
               icon: returnUpBackOutline,
-              handler: handleRestore,
+              handler: handleArchive,
             },
             {
               text: "Delete",
               icon: trashOutline,
               role: "destructive",
-              handler: handleOnDelete,
+              handler: handleDeleteConfirm,
             },
           ]
         : [
@@ -103,13 +179,13 @@ export function TodoItem({
             {
               text: "Archive",
               icon: archiveOutline,
-              handler: () => onArchive && onArchive(task.id),
+              handler: handleArchive,
             },
             {
               text: "Delete",
               icon: trashOutline,
               role: "destructive",
-              handler: handleOnDelete,
+              handler: handleDeleteConfirm,
             },
           ]),
       {
@@ -118,21 +194,14 @@ export function TodoItem({
         role: "cancel",
       },
     ],
-    [isArchived, task, onEdit, onArchive, onRestore, onDelete, setShowDetails],
+    [handleArchive, handleDeleteConfirm, handleEdit, isArchived],
   );
-
-  const handleToggleDone = useCallback(() => {
-    () => {
-      if (!isArchived && onToggleDone) {
-        onToggleDone(task.id);
-      }
-    };
-  }, [isArchived, onToggleDone, task.id]);
 
   return (
     <>
+      <LoadingOverlay isOpen={isLoading} />
       <IonItem className="todo-item">
-        {!isArchived && onToggleDone && (
+        {!isArchived && (
           <IonCheckbox
             slot="start"
             checked={task.done}
@@ -142,7 +211,7 @@ export function TodoItem({
         )}
 
         <IonLabel
-          onClick={onToggleDone ? handleToggleDone : undefined}
+          onClick={handleToggleDone}
           className={`${task.done ? "task-done" : ""} ${!isArchived ? "task-label-pointer" : ""}`}
         >
           {task.title}
@@ -178,16 +247,16 @@ export function TodoItem({
                 <IonButton color="medium" fill="clear" slot="end" onClick={handleArchive}>
                   <IonIcon icon={archiveOutline} />
                 </IonButton>
-                <IonButton color="danger" fill="clear" slot="end" onClick={handleOnDelete}>
+                <IonButton color="danger" fill="clear" slot="end" onClick={handleDeleteConfirm}>
                   <IonIcon icon={trashOutline} />
                 </IonButton>
               </>
             ) : (
               <>
-                <IonButton color="primary" fill="clear" slot="end" onClick={handleRestore}>
+                <IonButton color="primary" fill="clear" slot="end" onClick={handleArchive}>
                   <IonIcon icon={returnUpBackOutline} />
                 </IonButton>
-                <IonButton color="danger" fill="clear" slot="end" onClick={handleOnDelete}>
+                <IonButton color="danger" fill="clear" slot="end" onClick={handleDeleteConfirm}>
                   <IonIcon icon={trashOutline} />
                 </IonButton>
               </>
@@ -200,6 +269,25 @@ export function TodoItem({
         isOpen={showActionSheet}
         onDidDismiss={() => setShowActionSheet(false)}
         buttons={actionSheetButtons}
+      />
+
+      <IonAlert
+        isOpen={showDeleteAlert}
+        onDidDismiss={() => setShowDeleteAlert(false)}
+        header={"Confirm Delete"}
+        message={"Are you sure you want to delete this task?"}
+        buttons={[
+          {
+            text: "Cancel",
+            role: "cancel",
+            handler: () => setShowDeleteAlert(false),
+          },
+          {
+            text: "Delete",
+            role: "destructive",
+            handler: handleOnDelete,
+          },
+        ]}
       />
 
       <IonModal isOpen={showDetails} onDidDismiss={() => setShowDetails(false)}>

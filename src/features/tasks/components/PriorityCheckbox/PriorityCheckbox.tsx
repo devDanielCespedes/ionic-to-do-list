@@ -5,7 +5,7 @@ import { Priority, PrioritySchema, Task } from "../../shared/schemas";
 import styles from "./PriorityCheckbox.module.css";
 import { PriorityCheckboxProps } from "./priorityCheckboxSchema";
 
-export const defaultLabels = PrioritySchema.options.reduce(
+export const defaultLabels = Object.values(PrioritySchema._def.values).reduce(
   (acc, priority) => {
     acc[priority] = capitalizeWords(priority);
     return acc;

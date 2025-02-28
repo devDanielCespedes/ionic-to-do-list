@@ -18,11 +18,12 @@ import { TodoForms } from "../../components/TodoForms/TodoForms";
 import { TodoList } from "../../components/TodoList/TodoList";
 import { Priority, PrioritySchema, Task, TaskStatus, TaskStatusSchema } from "../../shared/schemas";
 
-import { useTaskStore } from "../../store/taskStore";
+import { useGetAllTasksQuery } from "../../../../graphql/generated";
+import { LoadingOverlay } from "../../components/LoadingOverlay/LoadingOverlay";
 import "./ActiveTasks.css";
 
 export function ActiveTasks() {
-  const { tasks } = useTaskStore();
+  // const { tasks } = useTaskStore();
   const isMobile = useIsMobile();
   const [showFilterModal, setShowFilterModal] = useState(false);
 
@@ -31,8 +32,21 @@ export function ActiveTasks() {
   );
 
   const [selectedPriorities, setSelectedPriorities] = useState<Array<Priority>>(
-    PrioritySchema.options.map((p) => p),
+    Object.values(PrioritySchema._def.values).map((p) => p),
   );
+
+  const { data, loading } = useGetAllTasksQuery();
+
+  const tasks: Omit<Task, "createdAt">[] | undefined = data?.getAllTasks
+    ?.filter((task) => !task?.archived)
+    .map((task) => ({
+      id: task?.id || "",
+      title: task?.title || "",
+      description: task?.description || "",
+      priority: task?.priority || PrioritySchema.enum.Low,
+      done: task?.done || false,
+      archived: task?.archived || false,
+    }));
 
   const toggleStatus = useCallback((status: TaskStatus, checked: boolean) => {
     setSelectedStatuses((prev) => {
@@ -59,12 +73,16 @@ export function ActiveTasks() {
   const toggleAll = useCallback((checked: boolean) => {
     if (checked) {
       setSelectedStatuses(TaskStatusSchema.options.map((s) => s));
-      setSelectedPriorities(PrioritySchema.options.map((p) => p));
+      setSelectedPriorities(Object.values(PrioritySchema._def.values).map((p) => p));
     }
   }, []);
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task: Task) => {
+    return (tasks ?? []).filter((task): task is Task => {
+      if (!task) {
+        return false;
+      }
+
       const matchesStatus =
         selectedStatuses.length === 2
           ? true
@@ -72,17 +90,20 @@ export function ActiveTasks() {
             ? task.done
             : !task.done;
 
-      const matchesPriority = selectedPriorities.includes(task.priority);
+      const matchesPriority =
+        task.priority !== undefined && selectedPriorities.includes(task.priority);
+
       return matchesStatus && matchesPriority;
     });
   }, [tasks, selectedStatuses, selectedPriorities]);
 
   const isAllSelected =
     TaskStatusSchema.options.length === selectedStatuses.length &&
-    PrioritySchema.options.length === selectedPriorities.length;
+    Object.values(PrioritySchema._def.values).length === selectedPriorities.length;
 
   return (
     <IonPage>
+      <LoadingOverlay isOpen={loading} />
       <IonHeader>
         <IonToolbar>
           <IonTitle>Active Tasks</IonTitle>
