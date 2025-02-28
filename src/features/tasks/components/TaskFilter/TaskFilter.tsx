@@ -58,7 +58,7 @@ export const TaskFilter = ({
           />
           <IonLabel>To Do</IonLabel>
         </div>
-        {PrioritySchema.options.map((priority) => (
+        {Object.values(PrioritySchema._def.values).map((priority) => (
           <PriorityCheckbox
             key={priority}
             priority={priority}

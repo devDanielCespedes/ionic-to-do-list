@@ -13,9 +13,18 @@ import {
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
-import { PrioritySchema, Task, TaskSchema, TITLE_MAX_LENGTH } from "../../shared/schemas";
+import { useUpdateTaskMutation } from "../../../../graphql/generated";
+import { GET_TASKS } from "../../../../graphql/queries";
+import { useSnackbar } from "../../../../shared/hooks/useSnackbar";
+import { capitalizeWords } from "../../../../shared/utils/stringUtils";
+import { PrioritySchema, Task, TITLE_MAX_LENGTH } from "../../shared/schemas";
 import { AlertValidator } from "../AlertValidator/AlertValidator";
-import { EditTaskModalProps, EditTaskModalPropsSchema } from "./editTaskModalSchema";
+import { LoadingOverlay } from "../LoadingOverlay/LoadingOverlay";
+import {
+  EditTaskModalProps,
+  EditTaskModalPropsSchema,
+  updateTaskInputSchema,
+} from "./editTaskModalSchema";
 
 export function EditTaskModal(props: EditTaskModalProps) {
   const safeParseResponse = EditTaskModalPropsSchema.safeParse(props);
@@ -28,7 +37,12 @@ export function EditTaskModal(props: EditTaskModalProps) {
     return <AlertValidator message={errorMessages} onDidDismiss={props.onClose} />;
   }
 
-  const { isOpen, onClose, task, onSave } = props;
+  const { isOpen, onClose, task } = props;
+
+  const [updateTask, { loading: updateTaskLoading }] = useUpdateTaskMutation({
+    refetchQueries: [{ query: GET_TASKS }],
+  });
+  const { clearMessage, showError, setMessage } = useSnackbar();
 
   const {
     register,
@@ -38,15 +52,32 @@ export function EditTaskModal(props: EditTaskModalProps) {
     watch,
     formState: { errors },
   } = useForm<Task>({
-    resolver: zodResolver(TaskSchema),
-    defaultValues: task,
+    resolver: zodResolver(updateTaskInputSchema),
+    defaultValues: {
+      title: task?.title ?? "",
+      description: task?.description ?? "",
+      priority: task?.priority ?? PrioritySchema.enum.Low,
+    },
   });
 
   const watchTitle = watch("title", "");
 
-  const onSubmit = (data: Task) => {
-    onSave({ ...task, ...data });
-    onClose();
+  const onSubmit = async (data: Task) => {
+    clearMessage();
+
+    try {
+      const { errors } = await updateTask({ variables: data });
+
+      if (errors && errors.length > 0) {
+        throw new Error(errors.map((err) => err.message).join(", "));
+      }
+      setMessage("Task updated successfully", "success");
+      reset();
+      onClose();
+    } catch (error) {
+      console.error("Captured error in TodoForms:", error);
+      showError(error);
+    }
   };
 
   useEffect(() => {
@@ -57,6 +88,7 @@ export function EditTaskModal(props: EditTaskModalProps) {
 
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onClose}>
+      <LoadingOverlay isOpen={updateTaskLoading} />
       <form onSubmit={handleSubmit(onSubmit)} className="ion-padding">
         <IonItem>
           <IonLabel position="stacked">
@@ -85,9 +117,9 @@ export function EditTaskModal(props: EditTaskModalProps) {
         <IonItem>
           <IonLabel position="stacked">Priority</IonLabel>
           <IonSelect {...register("priority")}>
-            {PrioritySchema.options.map((priority) => (
+            {Object.values(PrioritySchema._def.values).map((priority) => (
               <IonSelectOption key={priority} value={priority}>
-                {priority}
+                {capitalizeWords(priority)}
               </IonSelectOption>
             ))}
           </IonSelect>

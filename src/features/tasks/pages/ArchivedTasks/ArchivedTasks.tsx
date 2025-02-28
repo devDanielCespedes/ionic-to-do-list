@@ -9,20 +9,35 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { useCallback, useMemo, useState } from "react";
+import { useGetAllTasksQuery } from "../../../../graphql/generated";
 import { useIsMobile } from "../../../../shared/hooks/useIsMobile";
 import { TaskFilter } from "../../components/TaskFilter/TaskFilter";
 import { TodoList } from "../../components/TodoList/TodoList";
 import { Priority, PrioritySchema, Task, TaskStatus, TaskStatusSchema } from "../../shared/schemas";
-import { useTaskStore } from "../../store/taskStore";
 
 export function ArchivedTasks() {
-  const { archivedTasks } = useTaskStore();
+  const { data, loading } = useGetAllTasksQuery();
+
+  const tasks: Omit<Task, "createdAt">[] | undefined = useMemo(
+    () =>
+      data?.getAllTasks
+        ?.filter((task) => task?.archived)
+        .map((task) => ({
+          id: task?.id || "",
+          title: task?.title || "",
+          description: task?.description || "",
+          priority: task?.priority || PrioritySchema.enum.Low,
+          done: task?.done || false,
+          archived: task?.archived || false,
+        })),
+    [data],
+  );
 
   const [selectedStatuses, setSelectedStatuses] = useState<Array<TaskStatus>>(
     TaskStatusSchema.options.map((s) => s),
   );
   const [selectedPriorities, setSelectedPriorities] = useState<Array<Priority>>(
-    PrioritySchema.options.map((p) => p),
+    Object.values(PrioritySchema._def.values).map((p) => p),
   );
 
   const isMobile = useIsMobile();
@@ -59,12 +74,12 @@ export function ArchivedTasks() {
   const toggleAll = useCallback((checked: boolean) => {
     if (checked) {
       setSelectedStatuses(TaskStatusSchema.options.map((s) => s));
-      setSelectedPriorities(PrioritySchema.options.map((p) => p));
+      setSelectedPriorities(Object.values(PrioritySchema._def.values).map((p) => p));
     }
   }, []);
 
   const filteredTasks = useMemo(() => {
-    return archivedTasks.filter((task: Task) => {
+    return tasks?.filter((task: Task) => {
       const matchesStatus =
         selectedStatuses.length === 2 ||
         (selectedStatuses.includes(TaskStatusSchema.Enum.completed) && task.done) ||
@@ -73,7 +88,7 @@ export function ArchivedTasks() {
       const matchesPriority = selectedPriorities.includes(task.priority);
       return matchesStatus && matchesPriority;
     });
-  }, [archivedTasks, selectedStatuses, selectedPriorities]);
+  }, [tasks, selectedStatuses, selectedPriorities]);
 
   return (
     <IonPage>
@@ -120,7 +135,7 @@ export function ArchivedTasks() {
           </IonContent>
         </IonModal>
 
-        <TodoList tasks={filteredTasks} isArchived />
+        <TodoList tasks={filteredTasks || []} isArchived />
       </IonContent>
     </IonPage>
   );

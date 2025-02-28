@@ -11,11 +11,7 @@ interface PrioritySectionProps {
   title: string;
   tasks: Task[];
   emptyMessage?: string;
-  onToggleDone?: (id: string) => void;
-  onArchive?: (id: string) => void;
-  onRestore?: (id: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (task: Task) => void;
+  onEdit: (taskId: string) => void;
   isArchived?: boolean;
 }
 
@@ -24,10 +20,6 @@ export function PrioritySection({
   tasks,
   emptyMessage,
   isArchived,
-  onToggleDone,
-  onArchive,
-  onRestore,
-  onDelete,
   onEdit,
 }: PrioritySectionProps): JSX.Element {
   return (
@@ -39,16 +31,7 @@ export function PrioritySection({
         </IonItem>
       )}
       {tasks.map((task) => (
-        <TodoItem
-          key={task.id}
-          task={task}
-          isArchived={isArchived}
-          onToggleDone={onToggleDone}
-          onArchive={onArchive}
-          onRestore={onRestore}
-          onDelete={onDelete}
-          onEdit={onEdit}
-        />
+        <TodoItem key={task.id} task={task} isArchived={isArchived} onEdit={onEdit} />
       ))}
     </>
   );
@@ -60,23 +43,20 @@ interface TodoListProps {
 }
 
 export function TodoList({ tasks, isArchived }: TodoListProps) {
-  const {
-    toggleTaskDone,
-    archiveTask,
-    restoreTask,
-    deleteTask,
-    updateTask,
-    editingTask,
-    setEditingTask,
-    clearEditingTask,
-  } = useTaskStore();
+  const { setEditingTaskId, editingTaskId } = useTaskStore();
 
   const prioritySections = useMemo(() => {
-    return PrioritySchema.options.map((priority) => {
+    return Object.values(PrioritySchema._def.values).map((priority) => {
       const tasksForPriority = tasks.filter((task) => task.priority === priority);
       return { priority, tasks: tasksForPriority };
     });
   }, [tasks]);
+
+  const editingTaskIdBool = !!editingTaskId;
+
+  const currentTaskEditing = useMemo(() => {
+    return tasks.find((task) => task.id === editingTaskId);
+  }, [tasks, editingTaskId]);
 
   return (
     <>
@@ -88,21 +68,16 @@ export function TodoList({ tasks, isArchived }: TodoListProps) {
             tasks={tasks}
             emptyMessage={`No ${capitalizeWords(priority)} priority tasks.`}
             isArchived={isArchived}
-            onToggleDone={!isArchived ? toggleTaskDone : undefined}
-            onArchive={!isArchived ? archiveTask : undefined}
-            onRestore={isArchived ? restoreTask : undefined}
-            onDelete={deleteTask}
-            onEdit={setEditingTask}
+            onEdit={setEditingTaskId}
           />
         ))}
       </IonList>
 
-      {editingTask && (
+      {!!editingTaskIdBool && (
         <EditTaskModal
-          isOpen={!!editingTask}
-          onClose={clearEditingTask}
-          task={editingTask}
-          onSave={updateTask}
+          isOpen={!!editingTaskIdBool}
+          onClose={() => setEditingTaskId(null)}
+          task={currentTaskEditing}
         />
       )}
     </>
