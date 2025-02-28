@@ -31,6 +31,7 @@ import "@ionic/react/css/palettes/dark.system.css";
 
 /* Theme variables */
 import { TabNavigation } from "./features/tasks/components/TabNavigation/TabNavigation";
+import { TestGraphQL } from "./features/tasks/pages/TestGraphQL";
 import "./theme/variables.css";
 
 setupIonicReact();
@@ -40,6 +41,7 @@ export const App = (): JSX.Element => (
     <IonReactRouter>
       <IonRouterOutlet id="main">
         <Route path="/tabs" component={TabNavigation} />
+        <Route path="/test" component={TestGraphQL} />
         <Route exact path="/" render={() => <Redirect to="/tabs/active" />} />
       </IonRouterOutlet>
     </IonReactRouter>
