@@ -15,6 +15,6 @@ export function LoadingOverlay({ isOpen }: LoadingOverlayProps) {
         <IonSpinner name="crescent" className={styles.spinner} />
       </div>
     </div>,
-    document.body, // 🔹 Isso garante que o overlay cubra tudo
+    document.body, // render the overlay in the body of the document
   );
 }

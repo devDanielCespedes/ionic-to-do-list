@@ -2,6 +2,8 @@ import { IonContent, IonIcon, IonItem, IonLabel, IonList, IonMenu } from "@ionic
 import { archiveOutline, listOutline } from "ionicons/icons";
 import { useLocation } from "react-router-dom";
 import styles from "./TabNavigation.module.css";
+
+// TODO: Rename to Desktop Tabs Navigation
 export function TabNavigation() {
   const location = useLocation();
 
