@@ -3,10 +3,11 @@ import { IonReactRouter } from "@ionic/react-router";
 
 import { Redirect, Route } from "react-router";
 
-import { archiveOutline, listOutline } from "ionicons/icons";
+import { archiveOutline, listOutline, settings } from "ionicons/icons";
 import { ActiveTasks } from "../../pages/ActiveTasks/ActiveTasks";
 import { ArchivedTasks } from "../../pages/ArchivedTasks/ArchivedTasks";
 
+import { Settings } from "../../pages/Settings/Settings";
 import styles from "./MobileTabNavigation.module.css";
 
 export function MobileTabNavigation() {
@@ -18,6 +19,7 @@ export function MobileTabNavigation() {
 
           <Route path="/active" render={() => <ActiveTasks />} exact={true} />
           <Route path="/archived" render={() => <ArchivedTasks />} exact={true} />
+          <Route path="/settings" render={() => <Settings />} exact={true} />
         </IonRouterOutlet>
 
         <IonTabBar slot="bottom">
@@ -28,6 +30,10 @@ export function MobileTabNavigation() {
           <IonTabButton tab="archived" href="/archived">
             <IonIcon icon={archiveOutline} />
             <IonLabel>Archived</IonLabel>
+          </IonTabButton>
+          <IonTabButton tab="settings" href="/settings">
+            <IonIcon icon={settings} />
+            <IonLabel>Settings</IonLabel>
           </IonTabButton>
         </IonTabBar>
       </IonTabs>
