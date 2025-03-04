@@ -36,6 +36,7 @@ import { MobileTabNavigation } from "./features/tasks/components/MobileTabNaviga
 import { TabNavigation } from "./features/tasks/components/TabNavigation/TabNavigation";
 import { ActiveTasks } from "./features/tasks/pages/ActiveTasks/ActiveTasks";
 import { ArchivedTasks } from "./features/tasks/pages/ArchivedTasks/ArchivedTasks";
+import { Settings } from "./features/tasks/pages/Settings/Settings";
 import { TestGraphQL } from "./features/tasks/pages/TestGraphQL";
 import { Snackbar } from "./shared/components/Snackbar/Snackbar";
 
@@ -51,6 +52,7 @@ export const App = (): JSX.Element => (
         <IonRouterOutlet id="main-content">
           <Route exact path="/active" component={ActiveTasks} />
           <Route exact path="/archived" component={ArchivedTasks} />
+          <Route exact path="/settings" component={Settings} />
           <Route exact path="/test" component={TestGraphQL} />
           <Route exact path="/" render={() => <Redirect to="/active" />} />
         </IonRouterOutlet>
