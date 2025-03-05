@@ -1,33 +1,49 @@
 import { useEffect, useState } from "react";
 
+const THEME_STORAGE_KEY = "user-theme";
+
+const applyTheme = (isDark: boolean) => {
+  if (isDark) {
+    document.documentElement.classList.add("ion-palette-dark");
+  } else {
+    document.documentElement.classList.remove("ion-palette-dark");
+  }
+};
+
+const getInitialTheme = (): boolean => {
+  const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if (storedTheme !== null) return storedTheme === "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+};
+
+applyTheme(getInitialTheme());
+
 export function useTheme() {
-  const [isDark, setIsDark] = useState(
-    () => window.matchMedia("(prefers-color-scheme: dark)").matches, // Inicializa conforme o sistema
-  );
+  const [isDark, setIsDark] = useState<boolean>(getInitialTheme);
 
   useEffect(() => {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 
     const handleThemeChange = (event: MediaQueryListEvent) => {
       setIsDark(event.matches);
-      document.documentElement.classList.toggle("ion-palette-dark", event.matches);
+      applyTheme(event.matches);
+      localStorage.setItem(THEME_STORAGE_KEY, event.matches ? "dark" : "light");
     };
 
-    // Aplica o tema inicial
-    document.documentElement.classList.toggle("ion-palette-dark", isDark);
-
-    // Ouvinte para mudanças do sistema operacional
     prefersDark.addEventListener("change", handleThemeChange);
 
     return () => {
       prefersDark.removeEventListener("change", handleThemeChange);
     };
-  }, [isDark]);
+  }, []);
 
   const toggleTheme = () => {
     setIsDark((prev) => {
       const newTheme = !prev;
-      document.documentElement.classList.toggle("ion-palette-dark", newTheme);
+
+      applyTheme(newTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme ? "dark" : "light");
+
       return newTheme;
     });
   };
