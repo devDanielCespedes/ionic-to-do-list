@@ -1,3 +1,6 @@
-import { TaskSchema } from "../../shared/schemas";
+import { useTaskSchema } from "../../shared/schemas";
 
-export const TaskFormSInputSchema = TaskSchema.omit({ id: true, done: true });
+export const useTaskFormSInputSchema = () => {
+  const TaskSchema = useTaskSchema();
+  return TaskSchema.omit({ id: true, done: true });
+};

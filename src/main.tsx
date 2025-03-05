@@ -3,6 +3,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { apolloClient } from "./lib/apolloClient";
+import "./lib/locales/i18n.ts";
 
 const container = document.getElementById("root");
 const root = createRoot(container!);

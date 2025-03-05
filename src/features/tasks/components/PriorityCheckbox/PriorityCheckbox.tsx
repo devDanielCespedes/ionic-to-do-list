@@ -1,16 +1,16 @@
 import { IonCheckbox, IonLabel } from "@ionic/react";
 
-import { CapitalizeWords, capitalizeWords } from "../../../../shared/utils/stringUtils";
-import { Priority, PrioritySchema, Task } from "../../shared/schemas";
+import { useEnumTranslation } from "../../../../shared/utils/18nHelpers";
+import { Priority, PrioritySchema } from "../../shared/schemas";
 import styles from "./PriorityCheckbox.module.css";
 import { PriorityCheckboxProps } from "./priorityCheckboxSchema";
 
 export const defaultLabels = Object.values(PrioritySchema._def.values).reduce(
   (acc, priority) => {
-    acc[priority] = capitalizeWords(priority);
+    acc[priority] = priority;
     return acc;
   },
-  {} as Record<Priority, CapitalizeWords<Task["priority"]>>,
+  {} as Record<Priority, Priority>,
 );
 
 export const PriorityCheckbox = ({
@@ -19,7 +19,8 @@ export const PriorityCheckbox = ({
   togglePriority,
   label,
 }: PriorityCheckboxProps): JSX.Element => {
-  const displayLabel = label || defaultLabels[priority];
+  const { translatePriority } = useEnumTranslation();
+  const displayLabel = label || translatePriority(defaultLabels[priority]);
   const disabled = selectedPriorities.length === 1 && selectedPriorities.includes(priority);
   const checked = selectedPriorities.includes(priority);
 

@@ -13,20 +13,23 @@ import {
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
+import { useTranslation } from "react-i18next";
 import { useUpdateTaskMutation } from "../../../../graphql/generated";
 import { GET_TASKS } from "../../../../graphql/queries";
 import { useSnackbar } from "../../../../shared/hooks/useSnackbar";
-import { capitalizeWords } from "../../../../shared/utils/stringUtils";
+import { useEnumTranslation } from "../../../../shared/utils/18nHelpers";
 import { PrioritySchema, Task, TITLE_MAX_LENGTH } from "../../shared/schemas";
 import { AlertValidator } from "../AlertValidator/AlertValidator";
 import { LoadingOverlay } from "../LoadingOverlay/LoadingOverlay";
 import {
   EditTaskModalProps,
-  EditTaskModalPropsSchema,
-  updateTaskInputSchema,
+  useEditTaskModalPropsSchema,
+  useUpdateTaskInputSchema,
 } from "./editTaskModalSchema";
 
 export function EditTaskModal(props: EditTaskModalProps) {
+  const updateTaskInputSchema = useUpdateTaskInputSchema();
+  const EditTaskModalPropsSchema = useEditTaskModalPropsSchema();
   const safeParseResponse = EditTaskModalPropsSchema.safeParse(props);
 
   if (!safeParseResponse.success) {
@@ -38,6 +41,9 @@ export function EditTaskModal(props: EditTaskModalProps) {
   }
 
   const { isOpen, onClose, task } = props;
+
+  const { t } = useTranslation(["task", "common"]);
+  const { translatePriority } = useEnumTranslation();
 
   const [updateTask, { loading: updateTaskLoading }] = useUpdateTaskMutation({
     refetchQueries: [{ query: GET_TASKS }],
@@ -66,17 +72,22 @@ export function EditTaskModal(props: EditTaskModalProps) {
     clearMessage();
 
     try {
-      const { errors } = await updateTask({ variables: data });
+      const { errors } = await updateTask({
+        variables: {
+          ...data,
+          id: task?.id ?? "",
+        },
+      });
 
       if (errors && errors.length > 0) {
         throw new Error(errors.map((err) => err.message).join(", "));
       }
-      setMessage("Task updated successfully", "success");
+      setMessage(t("task:taskUpdatedSuccess"), "success");
       reset();
       onClose();
     } catch (error) {
-      console.error("Captured error in TodoForms:", error);
-      showError(error);
+      console.error(t("task:errorUpdatingTask"), error);
+      showError(`${t("task:errorUpdatingTask")} ${(error as Error).message}`);
     }
   };
 
@@ -92,7 +103,7 @@ export function EditTaskModal(props: EditTaskModalProps) {
       <form onSubmit={handleSubmit(onSubmit)} className="ion-padding">
         <IonItem>
           <IonLabel position="stacked">
-            Title ({watchTitle?.length ?? 0}/{TITLE_MAX_LENGTH})
+            {t("task:taskTitle")} ({watchTitle?.length ?? 0}/{TITLE_MAX_LENGTH})
           </IonLabel>
           <IonInput
             className={`${!errors?.title?.message && "ion-valid"} ${errors?.title?.message && "ion-invalid"} `}
@@ -103,23 +114,27 @@ export function EditTaskModal(props: EditTaskModalProps) {
               setValue("title", newTitle, { shouldValidate: true });
             }}
             maxlength={TITLE_MAX_LENGTH}
-            placeholder="Task title"
+            placeholder={t("task:taskTitle")}
           />
         </IonItem>
         {errors.title && <IonText color="danger">{errors.title.message}</IonText>}
 
         <IonItem>
-          <IonLabel position="stacked">Description</IonLabel>
-          <IonTextarea {...register("description")} placeholder="Task description" rows={15} />
+          <IonLabel position="stacked">{t("task:taskDescription")}</IonLabel>
+          <IonTextarea
+            {...register("description")}
+            placeholder={t("task:taskDescription")}
+            rows={15}
+          />
         </IonItem>
         {errors.description && <IonText color="danger">{errors.description.message}</IonText>}
 
         <IonItem>
-          <IonLabel position="stacked">Priority</IonLabel>
+          <IonLabel position="stacked">{t("taskPriority")}</IonLabel>
           <IonSelect {...register("priority")}>
             {Object.values(PrioritySchema._def.values).map((priority) => (
               <IonSelectOption key={priority} value={priority}>
-                {capitalizeWords(priority)}
+                {translatePriority(priority)}
               </IonSelectOption>
             ))}
           </IonSelect>
@@ -127,10 +142,10 @@ export function EditTaskModal(props: EditTaskModalProps) {
         {errors.priority && <IonText color="danger">{errors.priority.message}</IonText>}
 
         <IonButton expand="block" type="submit">
-          Save Changes
+          {t("common:save")}
         </IonButton>
         <IonButton expand="block" color="danger" onClick={onClose}>
-          Cancel
+          {t("common:cancel")}
         </IonButton>
       </form>
     </IonModal>

@@ -1,7 +1,8 @@
 import { IonItem, IonLabel, IonList, IonListHeader } from "@ionic/react";
 import { useMemo } from "react";
 
-import { capitalizeWords } from "../../../../shared/utils/stringUtils";
+import { useTranslation } from "react-i18next";
+import { useEnumTranslation } from "../../../../shared/utils/18nHelpers";
 import { PrioritySchema, Task } from "../../shared/schemas";
 import { useTaskStore } from "../../store/taskStore";
 import { EditTaskModal } from "../EditTaskModal/EditTaskModal";
@@ -44,6 +45,8 @@ interface TodoListProps {
 
 export function TodoList({ tasks, isArchived }: TodoListProps) {
   const { setEditingTaskId, editingTaskId } = useTaskStore();
+  const { translatePriority } = useEnumTranslation();
+  const { t } = useTranslation(["task", "common"]);
 
   const prioritySections = useMemo(() => {
     return Object.values(PrioritySchema._def.values).map((priority) => {
@@ -64,9 +67,9 @@ export function TodoList({ tasks, isArchived }: TodoListProps) {
         {prioritySections.map(({ priority, tasks }) => (
           <PrioritySection
             key={priority}
-            title={`${capitalizeWords(priority)} Priority`}
+            title={translatePriority(priority)}
             tasks={tasks}
-            emptyMessage={`No ${capitalizeWords(priority)} priority tasks.`}
+            emptyMessage={t("NoPriorityTasks", { priority: translatePriority(priority) })}
             isArchived={isArchived}
             onEdit={setEditingTaskId}
           />

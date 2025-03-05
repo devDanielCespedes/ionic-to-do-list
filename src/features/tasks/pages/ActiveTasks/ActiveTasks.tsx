@@ -18,6 +18,7 @@ import { TodoForms } from "../../components/TodoForms/TodoForms";
 import { TodoList } from "../../components/TodoList/TodoList";
 import { Priority, PrioritySchema, Task, TaskStatus, TaskStatusSchema } from "../../shared/schemas";
 
+import { useTranslation } from "react-i18next";
 import { useGetAllTasksQuery } from "../../../../graphql/generated";
 import { LoadingOverlay } from "../../components/LoadingOverlay/LoadingOverlay";
 import "./ActiveTasks.css";
@@ -25,14 +26,14 @@ import "./ActiveTasks.css";
 export function ActiveTasks() {
   const isMobile = useIsMobile();
   const [showFilterModal, setShowFilterModal] = useState(false);
-
   const [selectedStatuses, setSelectedStatuses] = useState<Array<TaskStatus>>(
     TaskStatusSchema.options.map((s) => s),
   );
-
   const [selectedPriorities, setSelectedPriorities] = useState<Array<Priority>>(
     Object.values(PrioritySchema._def.values).map((p) => p),
   );
+
+  const { t } = useTranslation(["task", "common"]);
 
   const { data, loading } = useGetAllTasksQuery();
 
@@ -105,10 +106,10 @@ export function ActiveTasks() {
       <LoadingOverlay isOpen={loading} />
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Active Tasks</IonTitle>
+          <IonTitle>{t("task:activeTasks")}</IonTitle>
           {isMobile && (
             <IonButtons slot="end">
-              <IonButton onClick={() => setShowFilterModal(true)}>Filters</IonButton>
+              <IonButton onClick={() => setShowFilterModal(true)}>{t("common:filter")}</IonButton>
             </IonButtons>
           )}
         </IonToolbar>
@@ -135,9 +136,9 @@ export function ActiveTasks() {
         <IonModal isOpen={showFilterModal} onDidDismiss={() => setShowFilterModal(false)}>
           <IonHeader>
             <IonToolbar>
-              <IonTitle>Filters</IonTitle>
+              <IonTitle>{t("common:filter")}</IonTitle>
               <IonButtons slot="end">
-                <IonButton onClick={() => setShowFilterModal(false)}>Close</IonButton>
+                <IonButton onClick={() => setShowFilterModal(false)}>{t("common:close")}</IonButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>
