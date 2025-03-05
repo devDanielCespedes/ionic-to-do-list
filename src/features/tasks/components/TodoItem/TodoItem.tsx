@@ -24,6 +24,7 @@ import {
 } from "ionicons/icons";
 import { useCallback, useMemo, useState } from "react";
 
+import { useTranslation } from "react-i18next";
 import {
   useDeleteTaskMutation,
   useToggleTaskArchivedMutation,
@@ -32,6 +33,7 @@ import {
 import { GET_TASKS } from "../../../../graphql/queries";
 import { useIsMobile } from "../../../../shared/hooks/useIsMobile";
 import { useSnackbar } from "../../../../shared/hooks/useSnackbar";
+import { useEnumTranslation } from "../../../../shared/utils/18nHelpers";
 import { PrioritySchema, Task } from "../../shared/schemas";
 import { LoadingOverlay } from "../LoadingOverlay/LoadingOverlay";
 import "./TodoItem.css";
@@ -46,6 +48,7 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const { translatePriority, translateStatus } = useEnumTranslation();
 
   const [deleteTask, { loading: deleteTaskLoading }] = useDeleteTaskMutation({
     refetchQueries: [{ query: GET_TASKS }],
@@ -60,6 +63,8 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
       refetchQueries: [{ query: GET_TASKS }],
     });
 
+  const { t } = useTranslation(["task", "common"]);
+
   const isLoading = deleteTaskLoading || toggleTaskDoneLoading || toggleTaskArchivedLoading;
 
   const { showError, clearMessage, setMessage } = useSnackbar();
@@ -67,9 +72,9 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
   const isMobile = useIsMobile();
 
   const getBadgeData = (done: boolean, priority: Task["priority"]) => {
-    if (done) return { text: "DONE", color: "success" };
+    if (done) return { text: t("status.completed"), color: "success" };
     return {
-      text: priority.toUpperCase(),
+      text: translatePriority(priority),
       color:
         priority === PrioritySchema.enum.High
           ? "danger"
@@ -98,10 +103,10 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
         throw new Error(errors.map((err) => err.message).join(", "));
       }
 
-      setMessage("Task deleted successfully", "success");
+      setMessage(t("deleteTaskSuccess"), "success");
     } catch (error) {
-      console.error("Captured error in TodoForms:", error);
-      showError(error);
+      console.error(t("task:errorDeletingTask"), error);
+      showError(`${t("task:errorDeletingTask")} ${(error as Error).message}`);
     }
   }, [deleteTask, task.id]);
 
@@ -117,10 +122,13 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
         throw new Error(errors.map((err) => err.message).join(", "));
       }
 
-      setMessage(`Task ${task.done ? "undone" : "done"} successfully`, "success");
+      setMessage(
+        `${task.done ? t("task:taskUndoneSuccess") : t("task:taskDoneSuccess")}`,
+        "success",
+      );
     } catch (error) {
-      console.error("Captured error in TodoForms:", error);
-      showError(error);
+      console.error(t("task:errorChangingTaskStatus"), error);
+      showError(`${t("task:errorChangingTaskStatus")} ${(error as Error).message}`);
     }
   }, [toggleTaskDone, task.id, task.done]);
 
@@ -136,7 +144,18 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
         throw new Error(errors.map((err) => err.message).join(", "));
       }
 
-      setMessage(`Task ${isArchived ? "restored" : "archived"} successfully`, "success");
+      setMessage(
+        `${
+          isArchived
+            ? t("task:taskRestoredSuccess", {
+                title: task.title,
+              })
+            : t("task:taskArchivedSuccess", {
+                title: task.title,
+              })
+        } `,
+        "success",
+      );
     } catch (error) {
       console.error("Captured error in TodoForms:", error);
       showError(error);
@@ -152,19 +171,19 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
   const actionSheetButtons = useMemo(
     () => [
       {
-        text: "Details",
+        text: t("common:details"),
         icon: eyeOutline,
         handler: () => setShowDetails(true),
       },
       ...(isArchived
         ? [
             {
-              text: "Restore",
+              text: t("restoreTask"),
               icon: returnUpBackOutline,
               handler: handleArchive,
             },
             {
-              text: "Delete",
+              text: t("task:deleteTask"),
               icon: trashOutline,
               role: "destructive",
               handler: handleDeleteConfirm,
@@ -172,24 +191,24 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
           ]
         : [
             {
-              text: "Edit",
+              text: t("task:editTask"),
               icon: pencilOutline,
               handler: handleEdit,
             },
             {
-              text: "Archive",
+              text: t("archiveTask"),
               icon: archiveOutline,
               handler: handleArchive,
             },
             {
-              text: "Delete",
+              text: t("task:deleteTask"),
               icon: trashOutline,
               role: "destructive",
               handler: handleDeleteConfirm,
             },
           ]),
       {
-        text: "Cancel",
+        text: t("common:cancel"),
         icon: closeOutline,
         role: "cancel",
       },
@@ -274,16 +293,16 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
       <IonAlert
         isOpen={showDeleteAlert}
         onDidDismiss={() => setShowDeleteAlert(false)}
-        header={"Confirm Delete"}
-        message={"Are you sure you want to delete this task?"}
+        header={t("common:confirmDeleteHeader", { item: t("task:task") })}
+        message={t("common:confirmDeleteDescription", { item: `${t("task")} ${task.title}` })}
         buttons={[
           {
-            text: "Cancel",
+            text: t("common:cancel"),
             role: "cancel",
             handler: () => setShowDeleteAlert(false),
           },
           {
-            text: "Delete",
+            text: t("task:deleteTask"),
             role: "destructive",
             handler: handleOnDelete,
           },
@@ -293,18 +312,28 @@ export function TodoItem({ task, onEdit, isArchived }: TodoItemProps) {
       <IonModal isOpen={showDetails} onDidDismiss={() => setShowDetails(false)}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Task Details</IonTitle>
+            <IonTitle>
+              {t("common:details")}: {t("task:task")} {task.title}
+            </IonTitle>
             <IonButton slot="end" fill="clear" onClick={() => setShowDetails(false)}>
               <IonIcon icon={closeOutline} />
             </IonButton>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
+          <IonLabel>{t("task:taskTitle")}</IonLabel>
           <h2>{task.title}</h2>
-          <IonBadge color={color} className={priorityClass}>
-            {text}
-          </IonBadge>
-          <p className="todo-item-description">{task.description || "No description available."}</p>
+          <div>
+            <IonLabel>{t("task:taskStatus")}</IonLabel>
+            <br />
+            <IonBadge color={color} className={`${priorityClass} ion-margin-top`}>
+              {text}
+            </IonBadge>
+          </div>
+          <div className="todo-item-description">
+            <IonLabel>{t("task:taskDescription")}</IonLabel>
+            <h2>{task.description || "No description available."}</h2>
+          </div>
         </IonContent>
       </IonModal>
     </>

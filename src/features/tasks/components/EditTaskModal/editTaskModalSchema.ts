@@ -1,14 +1,21 @@
 import { z } from "zod";
-import { TaskSchema } from "../../shared/schemas";
+import { useTaskSchema } from "../../shared/schemas";
 
-export const EditTaskModalPropsSchema = z.object({
-  isOpen: z.boolean(),
-  onClose: z.function().args().returns(z.void()),
-  task: TaskSchema.optional(),
-});
+export const useEditTaskModalPropsSchema = () => {
+  const updateTaskInputSchema = useTaskSchema();
 
-export type EditTaskModalProps = z.infer<typeof EditTaskModalPropsSchema>;
+  return z.object({
+    isOpen: z.boolean(),
+    onClose: z.function().args().returns(z.void()),
+    task: updateTaskInputSchema.optional(),
+  });
+};
 
-export const updateTaskInputSchema = TaskSchema;
+export type EditTaskModalProps = z.infer<ReturnType<typeof useEditTaskModalPropsSchema>>;
 
-export type UpdateTaskInput = z.infer<typeof updateTaskInputSchema>;
+export const useUpdateTaskInputSchema = () => {
+  const updateTaskInputSchema = useTaskSchema();
+  return updateTaskInputSchema;
+};
+
+export type UpdateTaskInput = z.infer<ReturnType<typeof useUpdateTaskInputSchema>>;

@@ -15,13 +15,14 @@ import {
 import { useForm } from "react-hook-form";
 import { useIsMobile } from "../../../../shared/hooks/useIsMobile";
 
+import { useTranslation } from "react-i18next";
 import { useCreateTaskMutation } from "../../../../graphql/generated";
 import { GET_TASKS } from "../../../../graphql/queries";
 import { useSnackbar } from "../../../../shared/hooks/useSnackbar";
-import { capitalizeWords } from "../../../../shared/utils/stringUtils";
+import { useEnumTranslation } from "../../../../shared/utils/18nHelpers";
 import { PrioritySchema, Task, TITLE_MAX_LENGTH } from "../../shared/schemas";
 import { LoadingOverlay } from "../LoadingOverlay/LoadingOverlay";
-import { TaskFormSInputSchema } from "./todoFormsSchema";
+import { useTaskFormSInputSchema } from "./todoFormsSchema";
 
 export function TodoForms() {
   const isMobile = useIsMobile();
@@ -29,6 +30,8 @@ export function TodoForms() {
   const [createTask, { loading }] = useCreateTaskMutation({
     refetchQueries: [{ query: GET_TASKS }],
   });
+
+  const TaskFormSInputSchema = useTaskFormSInputSchema();
 
   const {
     register,
@@ -50,6 +53,9 @@ export function TodoForms() {
 
   const watchedTitle = watch("title", "");
 
+  const { t } = useTranslation(["task", "common"]);
+  const { translatePriority } = useEnumTranslation();
+
   const onSubmit = async (data: Omit<Task, "id" | "done" | "createdAt" | "updatedAt">) => {
     clearMessage();
 
@@ -59,11 +65,11 @@ export function TodoForms() {
       if (errors && errors.length > 0) {
         throw new Error(errors.map((err) => err.message).join(", "));
       }
-      setMessage("Task created successfully", "success");
+      setMessage(t("task:createTaskSuccess"), "success");
       reset();
     } catch (error) {
-      console.error("Captured error in TodoForms:", error);
-      showError(error);
+      console.error(t("task:errorCreatingTask"), error);
+      showError(`${t("task:errorCreatingTask")}: ${(error as Error).message}`);
     }
   };
 
@@ -75,11 +81,11 @@ export function TodoForms() {
           <IonRow>
             <IonCol size="12" sizeLg="3">
               <IonItem>
-                <IonLabel position="stacked">Priority</IonLabel>
+                <IonLabel position="stacked">{t("taskPriority")}</IonLabel>
                 <IonSelect {...register("priority")}>
                   {Object.values(PrioritySchema._def.values).map((priority) => (
                     <IonSelectOption key={priority} value={priority}>
-                      {capitalizeWords(priority)}
+                      {translatePriority(priority)}
                     </IonSelectOption>
                   ))}
                 </IonSelect>
@@ -89,7 +95,7 @@ export function TodoForms() {
             <IonCol size="12" sizeLg="9">
               <IonItem>
                 <IonLabel position="stacked">
-                  Title ({watchedTitle?.length ?? 0}/{TITLE_MAX_LENGTH})
+                  {t("task:taskTitle")} ({watchedTitle?.length ?? 0}/{TITLE_MAX_LENGTH})
                 </IonLabel>
                 <IonInput
                   {...register("title")}
@@ -98,7 +104,7 @@ export function TodoForms() {
                     setValue("title", newTitle, { shouldValidate: true });
                   }}
                   maxlength={TITLE_MAX_LENGTH}
-                  placeholder="Task title"
+                  placeholder={t("task:taskTitle")}
                 />
               </IonItem>
               {errors.title && <IonNote color="danger">{errors.title.message}</IonNote>}
@@ -108,7 +114,7 @@ export function TodoForms() {
           <IonRow>
             <IonCol>
               <IonItem>
-                <IonLabel position="stacked">Description</IonLabel>
+                <IonLabel position="stacked">{t("task:taskDescription")}</IonLabel>
                 <IonTextarea {...register("description")} rows={isMobile ? 1 : 3} />
               </IonItem>
               {errors.description && <IonNote color="danger">{errors.description.message}</IonNote>}
@@ -118,7 +124,7 @@ export function TodoForms() {
           <IonRow>
             <IonCol>
               <IonButton expand="block" type="submit">
-                Add Task
+                {t("task:createTask")}
               </IonButton>
             </IonCol>
           </IonRow>

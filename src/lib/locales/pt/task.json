@@ -1,0 +1,49 @@
+{
+  "priority": {
+    "HIGH": "Alta",
+    "MEDIUM": "Média",
+    "LOW": "Baixa"
+  },
+  "status": {
+    "completed": "Concluído",
+    "incomplete": "Incompleto"
+  },
+  "errors": {
+    "titleMin": "O título deve ter pelo menos {{min}} caracteres",
+    "titleMax": "O título não pode exceder {{max}} caracteres"
+  },
+  "task": "Tarefa",
+  "archivedTasks": "Tarefas arquivadas",
+  "activeTasks": "Tarefas ativas",
+  "createTask": "Criar tarefa",
+  "editTask": "Editar tarefa",
+  "deleteTask": "Excluir tarefa",
+  "taskTitle": "Título da tarefa",
+  "taskDescription": "Descrição da tarefa",
+  "taskPriority": "Prioridade da tarefa",
+  "taskStatus": "Status da tarefa",
+  "taskActions": "Ações da tarefa",
+  "taskCreated": "Tarefa criada",
+  "taskUpdated": "Tarefa atualizada",
+  "taskDeleted": "Tarefa excluída",
+  "taskCompleted": "Tarefa concluída",
+  "taskIncomplete": "Tarefa incompleta",
+  "taskArchived": "Tarefa arquivada",
+  "taskUnarchived": "Tarefa desarquivada",
+  "taskArchivedSuccess": "Tarefa {{title}} arquivada com sucesso",
+  "taskRestoredSuccess": "Tarefa {{title}} restaurada com sucesso",
+  "NoPriorityTasks": "Nenhuma tarefa de prioridade {{priority}}",
+  "taskUpdatedSuccess": "Tarefa atualizada com sucesso",
+  "errorUpdatingTask": "Erro ao atualizar tarefa",
+  "createTaskSuccess": "Tarefa criada com sucesso",
+  "errorCreatingTask": "Erro ao criar tarefa",
+  "deleteTaskSuccess": "Tarefa excluída com sucesso",
+  "errorDeletingTask": "Erro ao excluir tarefa",
+  "taskDoneSuccess": "Tarefa concluída com sucesso",
+  "taskUndoneSuccess": "Tarefa desfeita com sucesso",
+  "errorChangingTaskStatus": "Erro ao alterar status da tarefa",
+  "archiveTask": "Arquivar tarefa",
+  "restoreTask": "Restaurar tarefa",
+  "errorArchivingTask": "Erro ao arquivar tarefa",
+  "errorRestoringTask": "Erro ao restaurar tarefa"
+}

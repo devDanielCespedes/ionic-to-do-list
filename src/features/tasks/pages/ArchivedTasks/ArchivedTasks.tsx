@@ -9,6 +9,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useGetAllTasksQuery } from "../../../../graphql/generated";
 import { useIsMobile } from "../../../../shared/hooks/useIsMobile";
 import { TaskFilter } from "../../components/TaskFilter/TaskFilter";
@@ -17,6 +18,7 @@ import { Priority, PrioritySchema, Task, TaskStatus, TaskStatusSchema } from "..
 
 export function ArchivedTasks() {
   const { data, loading } = useGetAllTasksQuery();
+  const { t } = useTranslation(["task", "common"]);
 
   const tasks: Omit<Task, "createdAt">[] | undefined = useMemo(
     () =>
@@ -94,10 +96,10 @@ export function ArchivedTasks() {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Archived Tasks</IonTitle>
+          <IonTitle>{t("archivedTasks")}</IonTitle>
           {isMobile && (
             <IonButtons slot="end">
-              <IonButton onClick={() => setShowFilterModal(true)}>Filters</IonButton>
+              <IonButton onClick={() => setShowFilterModal(true)}>{t("common:filter")}</IonButton>
             </IonButtons>
           )}
         </IonToolbar>
@@ -117,9 +119,9 @@ export function ArchivedTasks() {
         <IonModal isOpen={showFilterModal} onDidDismiss={() => setShowFilterModal(false)}>
           <IonHeader>
             <IonToolbar>
-              <IonTitle>Filters</IonTitle>
+              <IonTitle>{t("common:filter")}</IonTitle>
               <IonButtons slot="end">
-                <IonButton onClick={() => setShowFilterModal(false)}>Close</IonButton>
+                <IonButton onClick={() => setShowFilterModal(false)}>{t("common:close")}</IonButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>

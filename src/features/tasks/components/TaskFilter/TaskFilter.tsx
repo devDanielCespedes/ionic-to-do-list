@@ -1,7 +1,9 @@
 import { IonCheckbox, IonItem, IonLabel } from "@ionic/react";
 import { PriorityCheckbox } from "../PriorityCheckbox/PriorityCheckbox";
 
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { useEnumTranslation } from "../../../../shared/utils/18nHelpers";
 import { PrioritySchema, TaskStatusSchema } from "../../shared/schemas";
 import styles from "./TaskFilter.module.css";
 
@@ -24,6 +26,9 @@ export const TaskFilter = ({
   toggleAll,
   isAllSelected,
 }: TaskFilterProps) => {
+  const { translateStatus } = useEnumTranslation();
+  const { t } = useTranslation(["common"]);
+
   return (
     <IonItem lines="none">
       <div className={styles.container}>
@@ -33,7 +38,7 @@ export const TaskFilter = ({
             onIonChange={(e) => toggleAll(e.detail.checked)}
             disabled={isAllSelected}
           />
-          <IonLabel>All</IonLabel>
+          <IonLabel>{t("all")}</IonLabel>
         </div>
 
         <div className={styles.checkboxContainer}>
@@ -45,7 +50,7 @@ export const TaskFilter = ({
               selectedStatuses.includes(TaskStatusSchema.Enum.completed)
             }
           />
-          <IonLabel>Done</IonLabel>
+          <IonLabel>{translateStatus(TaskStatusSchema.Enum.completed)}</IonLabel>
         </div>
         <div className={styles.checkboxContainer}>
           <IonCheckbox
@@ -56,7 +61,7 @@ export const TaskFilter = ({
               selectedStatuses.includes(TaskStatusSchema.Enum.incomplete)
             }
           />
-          <IonLabel>To Do</IonLabel>
+          <IonLabel>{translateStatus(TaskStatusSchema.Enum.incomplete)}</IonLabel>
         </div>
         {Object.values(PrioritySchema._def.values).map((priority) => (
           <PriorityCheckbox

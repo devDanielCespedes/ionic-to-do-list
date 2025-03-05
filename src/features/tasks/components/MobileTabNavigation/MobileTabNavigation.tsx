@@ -7,10 +7,13 @@ import { archiveOutline, listOutline, settings } from "ionicons/icons";
 import { ActiveTasks } from "../../pages/ActiveTasks/ActiveTasks";
 import { ArchivedTasks } from "../../pages/ArchivedTasks/ArchivedTasks";
 
+import { useTranslation } from "react-i18next";
 import { Settings } from "../../pages/Settings/Settings";
 import styles from "./MobileTabNavigation.module.css";
 
 export function MobileTabNavigation() {
+  const { t } = useTranslation(["common"]);
+
   return (
     <IonReactRouter>
       <IonTabs className={styles.mobileTabs}>
@@ -23,17 +26,17 @@ export function MobileTabNavigation() {
         </IonRouterOutlet>
 
         <IonTabBar slot="bottom">
-          <IonTabButton tab="active" href="/active">
+          <IonTabButton tab={t("active")} href="/active">
             <IonIcon icon={listOutline} />
-            <IonLabel>Active</IonLabel>
+            <IonLabel>{t("active")}</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="archived" href="/archived">
+          <IonTabButton tab={t("archived")} href="/archived">
             <IonIcon icon={archiveOutline} />
-            <IonLabel>Archived</IonLabel>
+            <IonLabel>{t("archived")}</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="settings" href="/settings">
+          <IonTabButton tab={t("settings")} href="/settings">
             <IonIcon icon={settings} />
-            <IonLabel>Settings</IonLabel>
+            <IonLabel>{t("settings")}</IonLabel>
           </IonTabButton>
         </IonTabBar>
       </IonTabs>

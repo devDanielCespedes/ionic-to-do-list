@@ -1,0 +1,49 @@
+{
+  "priority": {
+    "HIGH": "High",
+    "MEDIUM": "Medium",
+    "LOW": "Low"
+  },
+  "status": {
+    "completed": "Done",
+    "incomplete": "To Do"
+  },
+  "errors": {
+    "titleMin": "Title should be at least {{min}} characters",
+    "titleMax": "Title cannot exceed {{max}} characters"
+  },
+  "task": "Task",
+  "archivedTasks": "Archived tasks",
+  "activeTasks": "Active tasks",
+  "createTask": "Create task",
+  "editTask": "Edit task",
+  "deleteTask": "Delete task",
+  "taskTitle": "Task title",
+  "taskDescription": "Task description",
+  "taskPriority": "Task priority",
+  "taskStatus": "Task status",
+  "taskActions": "Task actions",
+  "taskCreated": "Task created",
+  "taskUpdated": "Task updated",
+  "taskDeleted": "Task deleted",
+  "taskCompleted": "Task completed",
+  "taskIncomplete": "Task incomplete",
+  "taskArchived": "Task archived",
+  "taskUnarchived": "Task unarchived",
+  "taskArchivedSuccess": "Task {{title}} archived successfully",
+  "taskRestoredSuccess": "Task {{title}} restored successfully",
+  "NoPriorityTasks": "No {{priority}} priority tasks",
+  "taskUpdatedSuccess": "Task updated successfully",
+  "errorUpdatingTask": "Error updating task",
+  "createTaskSuccess": "Task created successfully",
+  "errorCreatingTask": "Error creating task",
+  "deleteTaskSuccess": "Task deleted successfully",
+  "errorDeletingTask": "Error deleting task",
+  "taskDoneSuccess": "Task done successfully",
+  "taskUndoneSuccess": "Task undone successfully",
+  "errorChangingTaskStatus": "Error changing task status",
+  "archiveTask": "Archive task",
+  "restoreTask": "Restore task",
+  "errorArchivingTask": "Error archiving task",
+  "errorRestoringTask": "Error restoring task"
+}
